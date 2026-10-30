@@ -186,8 +186,17 @@
                 scores[4]++;
                 document.getElementById('score5').innerText = scores[4];
             }
-        });
+       });
 
+        // TEST İÇİN KLAVYE KISAYOLU (Yayın açmadan test etmek için)
+        window.addEventListener('keydown', (e) => {
+            if (e.key === "1") { scores[0]++; document.getElementById('score1').innerText = scores[0]; }
+            if (e.key === "2") { scores[1]++; document.getElementById('score2').innerText = scores[1]; }
+            if (e.key === "3") { scores[2]++; document.getElementById('score3').innerText = scores[2]; }
+            if (e.key === "4") { scores[3]++; document.getElementById('score4').innerText = scores[3]; }
+            if (e.key === "5") { scores[4]++; document.getElementById('score5').innerText = scores[4]; }
+        });
+     
         // 2. Hediyeler
         socket.on('gift', data => {
             if (data.giftType === 1 && !data.repeatEnd) return;
