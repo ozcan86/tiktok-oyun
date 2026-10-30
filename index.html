@@ -81,14 +81,13 @@
             text-shadow: 0 0 8px rgba(46, 204, 113, 0.8);
         }
         
-        /* Bağlantı Durumu Göstergesi */
         #status {
             position: absolute;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
-            color: yellow;
+            color: #F1C40F;
             background: rgba(0,0,0,0.7);
             padding: 5px 15px;
             border-radius: 10px;
@@ -98,7 +97,7 @@
 </head>
 <body>
 
-    <div id="status">Bağlanılıyor...</div>
+    <div id="status">Bağlantı Bekleniyor...</div>
 
     <div class="wrapper">
         <img src="arkaplan.jpg" alt="Arka Plan" class="background-image">
@@ -137,29 +136,38 @@
         </div>
     </div>
 
-    <!-- TikTok Bağlantı Kütüphanesi ve Puanlama Mantığı -->
+    <!-- TikTok Bağlantı Kütüphanesi -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
     <script>
         let scores = [0, 0, 0, 0, 0];
-        let tiktokUsername = "ozcan1_"; // Kullanıcı adınız
+        let tiktokUsername = "ozcan1_";
 
         const statusEl = document.getElementById('status');
-        const socket = io('https://tiktok-chat-reader.zerody.one/');
+        const socket = io('https://tiktok-chat-reader.zerody.one/', {
+            transports: ['websocket', 'polling'],
+            reconnection: true,
+            reconnectionAttempts: Infinity,
+            reconnectionDelay: 1000
+        });
 
         socket.on('connect', () => {
-            statusEl.innerText = "Bağlandı! Yayın aranıyor: " + tiktokUsername;
-            statusEl.style.color = "#2ECC71";
+            statusEl.innerText = "Yayın Takip Ediliyor: " + tiktokUsername;
+            statusEl.style.color = "#F1C40F";
             socket.emit('setUniqueId', { uniqueId: tiktokUsername });
         });
 
+        socket.on('connected', () => {
+            statusEl.innerText = "Canlı Bağlantı Kuruldu: " + tiktokUsername;
+            statusEl.style.color = "#2ECC71";
+        });
+
         socket.on('disconnect', () => {
-            statusEl.innerText = "Bağlantı koptu!";
+            statusEl.innerText = "Bağlantı koptu, yeniden bağlanılıyor...";
             statusEl.style.color = "#E74C3C";
         });
 
-        // Test için ekrana chatten gelenleri yazdıralım
+        // 1. Sohbet Komutları
         socket.on('chat', data => {
-            console.log(data.uniqueId + ": " + data.comment);
             let msg = data.comment.trim().toLowerCase();
 
             if (msg === "1" || msg === "gs" || msg === "galatasaray") {
@@ -180,6 +188,7 @@
             }
         });
 
+        // 2. Hediyeler
         socket.on('gift', data => {
             if (data.giftType === 1 && !data.repeatEnd) return;
 
